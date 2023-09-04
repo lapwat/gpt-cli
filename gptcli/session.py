@@ -1,3 +1,5 @@
+import subprocess
+import re
 from abc import abstractmethod
 from typing_extensions import TypeGuard
 from gptcli.assistant import Assistant
@@ -34,7 +36,32 @@ class ChatListener:
         return ResponseStreamer()
 
     def on_chat_message(self, message: Message):
-        pass
+        response = message['content']
+
+        # Define regular expression pattern to match code blocks
+        code_pattern = r"```([\s\S]*?)```"
+
+        # Find all code blocks in the response
+        code_blocks = re.findall(code_pattern, response)
+
+        # Remove backticks from code blocks
+        code_blocks = [code.replace('```', '') for code in code_blocks]
+
+        # Print the code blocks and prompt user to run them
+        for code_block in code_blocks:
+            print(f"Code block: {code_block}")
+            user_input = input("Do you want to run this code block? (y/n) ")
+            if user_input == 'y':
+                with open("temp_bash_script.sh", "w") as f:
+                    f.write(code_block)
+
+                subprocess.run(["chmod", "+x", "temp_bash_script.sh"])
+                result = subprocess.run(["./temp_bash_script.sh"], capture_output=True, text=True)
+
+                # Print the output and return code
+                print("Output:")
+                print(result.stdout)
+                print("Return code:", result.returncode)
 
     def on_chat_response(
         self, messages: List[Message], response: Message, overrides: ModelOverrides
