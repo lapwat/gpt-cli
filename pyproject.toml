@@ -28,6 +28,8 @@ dependencies = [
     "tiktoken==0.3.3",
     "tokenizers==0.13.3",
     "typing_extensions==4.5.0",
+    "PyAudio==0.2.13",
+    "SpeechRecognition==3.10.0",
 ]
 
 [project.optional-dependencies]

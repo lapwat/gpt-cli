@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
 from typing import Any, Dict, Optional, Tuple
+import speech_recognition as sr
 
 from rich.text import Text
 from gptcli.session import (
@@ -194,12 +195,30 @@ class CLIUserInputProvider(UserInputProvider):
             return ""
 
     def _request_input(self):
-        line = self.prompt()
+        # Initialize the recognizer
+        recognizer = sr.Recognizer()
 
-        if line != "\\":
-            return line
+        # Configure the microphone as the audio source
+        with sr.Microphone() as source:
+            print("Say something...")
 
-        return self.prompt(multiline=True)
+            # Adjust for ambient noise
+            recognizer.adjust_for_ambient_noise(source)
+
+            # Listen to the user
+            audio = recognizer.listen(source)
+
+            print("Audio captured. Transcribing...")
+
+        # Use Google Speech-to-Text API for transcription
+        try:
+            text = recognizer.recognize_google(audio)
+            print(text)
+            return text
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand the audio.")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition service; {e}")
 
     def _parse_input(self, input: str) -> Tuple[str, Dict[str, Any]]:
         input, args = parse_args(input)
