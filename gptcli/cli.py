@@ -212,7 +212,7 @@ class CLIUserInputProvider(UserInputProvider):
 
         # Use Google Speech-to-Text API for transcription
         try:
-            text = recognizer.recognize_google(audio)
+            text = recognizer.recognize_whisper_api(audio)
             print(text)
             return text
         except sr.UnknownValueError:
