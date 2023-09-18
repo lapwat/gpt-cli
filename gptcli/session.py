@@ -39,13 +39,13 @@ class ChatListener:
         response = message['content']
 
         # Define regular expression pattern to match code blocks
-        code_pattern = r"```([\s\S]*?)```"
+        code_pattern = r"```([\w]*)\n([\S\s]+?)\n```"
 
         # Find all code blocks in the response
         code_blocks = re.findall(code_pattern, response)
 
         # Remove backticks from code blocks
-        code_blocks = [code.replace('```', '') for code in code_blocks]
+        code_blocks = [code_block[1] for code_block in code_blocks]
 
         # Print the code blocks and prompt user to run them
         for code_block in code_blocks:
