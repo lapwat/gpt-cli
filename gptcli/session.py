@@ -35,11 +35,17 @@ class ChatListener:
     def response_streamer(self) -> ResponseStreamer:
         return ResponseStreamer()
 
+    last_response = None
+
     def on_chat_message(self, message: Message):
         response = message['content']
 
+        # check we have not processed the response already
+        if response == ChatListener.last_response: return
+        ChatListener.last_response = response
+
         # Define regular expression pattern to match code blocks
-        code_pattern = r"```([\w]*)\n([\S\s]+?)\n```"
+        code_pattern = r"```([\w]*)\n([\S\s]+?)```"
 
         # Find all code blocks in the response
         code_blocks = re.findall(code_pattern, response)
@@ -49,8 +55,8 @@ class ChatListener:
 
         # Print the code blocks and prompt user to run them
         for code_block in code_blocks:
-            print(f"Code block: {code_block}")
-            user_input = input("Do you want to run this code block? (y/n) ")
+            print(code_block)
+            user_input = input("Execute? (y/n) ")
             if user_input == 'y':
                 with open("temp_bash_script.sh", "w") as f:
                     f.write(code_block)
